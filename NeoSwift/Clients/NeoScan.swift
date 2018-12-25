@@ -16,7 +16,7 @@ typealias JSONDictionary = [String: Any]
     
     public var network: Network = .main
     
-    init(network: Network) {
+    public init(network: Network) {
         self.network = network
     }
     
