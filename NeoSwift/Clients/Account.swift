@@ -353,7 +353,7 @@ public class Account : NSObject, Codable {
         return Data(bytes: payload)
     }
     
-    func generateSendTransactionPayload(asset: AssetId, amount: Double, toAddress: String, assets: Assets, attributes: [TransactionAttritbute]? = nil, fee: Double = 0.0) -> (Data, Data) {
+    public func generateSendTransactionPayload(asset: AssetId, amount: Double, toAddress: String, assets: Assets, attributes: [TransactionAttritbute]? = nil, fee: Double = 0.0) -> (txID:String, payload:Data) {
         var error: NSError?
         
         var mainInputData: (totalAmount: Decimal?, inputCount: UInt8?, payload: Data?, error: Error?)
@@ -399,8 +399,8 @@ public class Account : NSObject, Codable {
         
         let signatureData = NeoutilsSign(rawTransactionData, privateKey.hexString, &error)
         let finalPayload = concatenatePayloadData(txData: rawTransactionData, signatureData: signatureData!)
-        return (rawTransactionData, finalPayload)
-        
+        let txID = unsignedPayloadToTransactionId(rawTransactionData)
+        return (txID, finalPayload)
     }
     
     func unsignedPayloadToTransactionId(_ unsignedPayload: Data) -> String {
