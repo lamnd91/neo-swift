@@ -106,7 +106,7 @@ Pod::Spec.new do |s|
 
   s.ios.vendored_frameworks = 'neoutils.framework'
 
-  # s.resource  = "icon.png"
+  s.resource  = "nodes.json"
   # s.resources = "Resources/*.png"
 
   # s.preserve_paths = "FilesToSave", "MoreFilesToSave"
