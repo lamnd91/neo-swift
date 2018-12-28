@@ -410,7 +410,7 @@ public class Account : NSObject, Codable {
         return reversed.hexString
     }
     
-    func generateClaimTransaction(claims: Unclaimed) -> (txid: String, payload:Data) {
+    public func generateClaimTransaction(claims: Unclaimed) -> (txid: String, payload:Data) {
         var payload: [UInt8] = [0x02] // Claim Transaction Type
         payload += [0x00]    // Version
         let claimsCount = UInt8(claims.claimable.count)
