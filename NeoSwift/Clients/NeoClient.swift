@@ -74,8 +74,13 @@ import Neoutils
     }
     
     @objc public static func autoSelectBestNode() -> String? {
-        let networks = NEONetworkMonitor().load()
-        let nodes = networks?.mainNet.nodes.map({$0.URL}).joined(separator: ",")
+        var nodes = ""
+        if let neoNodes = UserDefaults.standard.string(forKey: "neo.nodes") {
+            nodes = neoNodes
+        } else {
+            let networks = NEONetworkMonitor().load()
+            nodes = (networks?.mainNet.nodes.map({$0.URL}).joined(separator: ","))!
+        }
         guard let bestNode =  NeoutilsSelectBestSeedNode(nodes) else {
             return nil
         }
@@ -105,6 +110,18 @@ import Neoutils
         case getMemPool = "getrawmempool"
     }
     
+    public static var shared = NeoClient()
+    private override init() {
+        NeoScan.init(network: .main).getAllNodes { (neos, error) in
+            if let neos = neos {
+                let nodes = neos.map({$0.URL}).joined(separator: ",")
+                UserDefaults.standard.setValue(nodes, forKey: "neo.nodes")
+            }
+        }
+        if let best = NEONetworkMonitor.autoSelectBestNode() {
+            self.seed = best
+        }
+    }
     @objc public init(seed: String) {
         self.seed = seed
     }

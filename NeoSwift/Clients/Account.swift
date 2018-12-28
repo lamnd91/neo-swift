@@ -410,6 +410,39 @@ public class Account : NSObject, Codable {
         return reversed.hexString
     }
     
+    func generateClaimTransaction(claims: Unclaimed) -> (txid: String, payload:Data) {
+        var payload: [UInt8] = [0x02] // Claim Transaction Type
+        payload += [0x00]    // Version
+        let claimsCount = UInt8(claims.claimable.count)
+        payload += [claimsCount]
+        
+        for claim in claims.claimable {
+            payload += claim.txid.dataWithHexString().bytes.reversed()
+            payload += toByteArray(claim.n).prefix(upTo: 2)
+        }
+        
+        let amountDouble = claims.unclaimed * pow(10, 8)
+        let amountInt = UInt64(round(amountDouble))
+        
+        payload += [0x00]
+        payload += [0x00] // Inputs
+        payload += [0x01] // Output Count
+        payload += AssetId.gasAssetId.rawValue.dataWithHexString().bytes.reversed()
+        payload += toByteArray(amountInt)
+        payload += hashedSignature.bytes
+        #if DEBUG
+        print(payload.hexString)
+        #endif
+        
+        var error: NSError?
+        let rawClaim = Data(bytes: payload)
+        let signatureData = NeoutilsSign(rawClaim, privateKey.hexString, &error)
+        let finalPayload = concatenatePayloadData(txData: rawClaim, signatureData: signatureData!)
+        //hash unsigned tx to get txid
+        let txid = self.unsignedPayloadToTransactionId(rawClaim)
+        return (txid, finalPayload)
+    }
+    
     private func generateInvokeTransactionPayload(assets: Assets? = nil, script: String, contractAddress: String, attributes: [TransactionAttritbute]?, fee: Double = 0.0) -> (String, Data) {
         var error: NSError?
         let amount = 0.00000001
