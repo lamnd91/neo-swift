@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		350E2719207B5CE4006AB519 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350E2718207B5CE3006AB519 /* TransactionSummary.swift */; };
 		350E271A207B610C006AB519 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350E2718207B5CE3006AB519 /* TransactionSummary.swift */; };
-		35673163203BE83600DD57DC /* neoutils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35673162203BE83500DD57DC /* neoutils.framework */; };
 		6E013E2E1F694B77006EE34F /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E013E2D1F694B77006EE34F /* Asset.swift */; };
 		6E0F80C71F67F8E90068CEF8 /* TransactionAttritbute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E0F80C61F67F8E90068CEF8 /* TransactionAttritbute.swift */; };
 		6E67B16A1F9B22D800C566B6 /* nodes.json in Resources */ = {isa = PBXBuildFile; fileRef = 6EE8BB9B1F9B171100EF69D8 /* nodes.json */; };
@@ -19,7 +18,6 @@
 		6EADA9962071E7B80090C700 /* NeoScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EADA9952071E7B80090C700 /* NeoScan.swift */; };
 		6EADA9992071EBDF0090C700 /* NeoScanTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EADA9982071EBDF0090C700 /* NeoScanTest.swift */; };
 		6EADA99A2071EC200090C700 /* NeoScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EADA9952071E7B80090C700 /* NeoScan.swift */; };
-		6EADA99C2071ED530090C700 /* neoutils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35673162203BE83500DD57DC /* neoutils.framework */; };
 		754533991FA788370005BE53 /* ScriptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75670B891FA46ED100199380 /* ScriptBuilder.swift */; };
 		7545339A1FA78AB90005BE53 /* OpCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75670B871FA46A7800199380 /* OpCodes.swift */; };
 		75631AD51F5013BC008546CF /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75631AD41F5013BC008546CF /* Account.swift */; };
@@ -127,7 +125,6 @@
 
 /* Begin PBXFileReference section */
 		350E2718207B5CE3006AB519 /* TransactionSummary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSummary.swift; sourceTree = "<group>"; };
-		35673162203BE83500DD57DC /* neoutils.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = neoutils.framework; sourceTree = "<group>"; };
 		6E013E2D1F694B77006EE34F /* Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
 		6E0F80C61F67F8E90068CEF8 /* TransactionAttritbute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAttritbute.swift; sourceTree = "<group>"; };
 		6E7E088B1F6E9BEC000B86A9 /* strip-frameworks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "strip-frameworks.sh"; sourceTree = "<group>"; };
@@ -190,7 +187,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				35673163203BE83600DD57DC /* neoutils.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,7 +195,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				75CDAE2A1F48680500B05C51 /* NeoSwift.framework in Frameworks */,
-				6EADA99C2071ED530090C700 /* neoutils.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,7 +306,6 @@
 		75E8E4971F4DBD5300DBCD8E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				35673162203BE83500DD57DC /* neoutils.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -662,6 +656,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -724,6 +719,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -757,7 +753,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/NeoSwift",
@@ -795,7 +791,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/NeoSwift",
