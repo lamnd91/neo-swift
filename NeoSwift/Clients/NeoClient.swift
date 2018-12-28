@@ -151,29 +151,33 @@ import Neoutils
         request.httpBody = body
         
         let task = URLSession.shared.dataTask(with: request as URLRequest) { (data, _, err) in
-            if err != nil {
-                completion(nil, NeoClientError(.invalidRequest))
-                return
+            DispatchQueue.main.async {
+                if err != nil {
+                    completion(nil, NeoClientError(.invalidRequest))
+                    return
+                }
+                
+                if data == nil {
+                    completion(nil, NeoClientError(.invalidData))
+                    return
+                }
+                
+                guard let json = try? JSONSerialization.jsonObject(with: data!, options: []) as? JSONDictionary else {
+                    completion(nil, NeoClientError(.invalidData))
+                    return
+                }
+                
+                if json == nil {
+                    completion(nil, NeoClientError(.invalidData))
+                    return
+                }
+                
+                completion(json, nil)
             }
-            
-            if data == nil {
-                completion(nil, NeoClientError(.invalidData))
-                return
-            }
-            
-            guard let json = try? JSONSerialization.jsonObject(with: data!, options: []) as? JSONDictionary else {
-                completion(nil, NeoClientError(.invalidData))
-                return
-            }
-            
-            if json == nil {
-                completion(nil, NeoClientError(.invalidData))
-                return
-            }
-            
-            completion(json, nil)
         }
-        task.resume()
+        DispatchQueue.global().async {
+            task.resume()
+        }
     }
     
     @objc public func sendRawTransaction(with data: Data, completion: @escaping(Bool, NeoClientError?) -> Void) {

@@ -44,32 +44,33 @@ typealias JSONDictionary = [String: Any]
         request.httpMethod = "GET"
         
         let task = URLSession.shared.dataTask(with: request as URLRequest) { (data, _, err) in
-            if err != nil {
-                completion(nil, NeoClientError(.invalidRequest))
-                return
-            }
-            
-            guard let json = try? JSONSerialization.jsonObject(with: data!, options: []) as? JSONDictionary else {
-                completion(nil, NeoClientError(.invalidData))
-                return
-            }
-            
-            if json == nil {
-                guard let jsonArray = try? JSONSerialization.jsonObject(with: data!, options: []) as? [Any] else {
+            DispatchQueue.main.async {
+                if err != nil {
+                    completion(nil, NeoClientError(.invalidRequest))
+                    return
+                }
+                
+                if data == nil {
                     completion(nil, NeoClientError(.invalidData))
                     return
                 }
-                if jsonArray != nil {
-                    completion(jsonArray, nil)
+                
+                guard let json = try? JSONSerialization.jsonObject(with: data!, options: []) as? JSONDictionary else {
+                    completion(nil, NeoClientError(.invalidData))
                     return
                 }
-                completion(nil, NeoClientError(.invalidData))
-                return
+                
+                if json == nil {
+                    completion(nil, NeoClientError(.invalidData))
+                    return
+                }
+                
+                completion(json, nil)
             }
-            
-            completion(json, nil)
         }
-        task.resume()
+        DispatchQueue.global().async {
+            task.resume()
+        }
     }
     
     @objc public func getTransactionHistory(address: String, page: Int, completion: @escaping(TransactionHistory?, NeoClientError?) -> Void) {
