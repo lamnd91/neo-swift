@@ -54,18 +54,16 @@ typealias JSONDictionary = [String: Any]
                     completion(nil, NeoClientError(.invalidData))
                     return
                 }
-                
-                guard let json = try? JSONSerialization.jsonObject(with: data!, options: []) as? JSONDictionary else {
-                    completion(nil, NeoClientError(.invalidData))
+                let jsonObj = try? JSONSerialization.jsonObject(with: data!, options: [])
+                if let json = jsonObj as? JSONDictionary {
+                    completion(json, nil)
                     return
                 }
-                
-                if json == nil {
-                    completion(nil, NeoClientError(.invalidData))
+                if let jsonArray = jsonObj as? [JSONDictionary] {
+                    completion(jsonArray, nil)
                     return
                 }
-                
-                completion(json, nil)
+                completion(nil, NeoClientError(.invalidData))
             }
         }
         DispatchQueue.global().async {
