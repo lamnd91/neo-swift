@@ -219,13 +219,13 @@ public class Account : NSObject, Codable {
      *
      * NEED TO DOUBLE CHECK THE BYTE COUNT HERE
      */
-    public func getInputsNecessaryToSendNeo(amount: Double, assets: Assets?) ->
+    public func getInputsNecessaryToSendNeo(amount: Decimal, assets: Assets?) ->
         (totalAmount: Decimal?, inputCount: UInt8?, payload: Data?, error: Error?) {
             
             var sortedUnspents = [UTXO]()
             var neededForTransaction = [UTXO]()
             sortedUnspents = assets!.getSortedNEOUTXOs()
-            if sortedUnspents.reduce(0, {$0 + $1.value}) < Decimal(amount) {
+            if sortedUnspents.reduce(0, {$0 + $1.value}) < amount {
                 return (nil, nil, nil, NSError())
             }
             
@@ -233,7 +233,7 @@ public class Account : NSObject, Codable {
             var index = 0
             var count: UInt8 = 0
             //Assume we always have enough balance to do this, prevent the check for bal
-            while runningAmount < Decimal(amount) {
+            while runningAmount < amount {
                 neededForTransaction.append(sortedUnspents[index])
                 runningAmount += sortedUnspents[index].value
                 index += 1
@@ -249,7 +249,7 @@ public class Account : NSObject, Codable {
             return (runningAmount, count, Data(bytes: inputData), nil)
     }
     
-    public func getInputsNecessaryToSendGas(amount: Double, assets: Assets?, fee: Double = 0.0) ->
+    public func getInputsNecessaryToSendGas(amount: Decimal, assets: Assets?, fee: Decimal = 0.0) ->
         (totalAmount: Decimal?, inputCount: UInt8?, payload: Data?, error: Error?) {
             
             //asset less sending
@@ -261,7 +261,7 @@ public class Account : NSObject, Codable {
             var sortedUnspents = [UTXO]()
             var neededForTransaction = [UTXO]()
             sortedUnspents = assets!.getSortedGASUTXOs()
-            if sortedUnspents.reduce(0, {$0 + $1.value}) < Decimal(amount) {
+            if sortedUnspents.reduce(0, {$0 + $1.value}) < amount {
                 return (nil, nil, nil, NSError())
             }
             
@@ -269,7 +269,7 @@ public class Account : NSObject, Codable {
             var index = 0
             var count: UInt8 = 0
             //Assume we always have enough balance to do this, prevent the check for bal
-            while runningAmount < Decimal(amount) + Decimal(fee) {
+            while runningAmount < amount + fee {
                 neededForTransaction.append(sortedUnspents[index])
                 runningAmount += sortedUnspents[index].value
                 index += 1
@@ -298,13 +298,12 @@ public class Account : NSObject, Codable {
     }
     
     func getOuputDataPayload(asset: AssetId, with inputData: Data, runningAmount: Decimal,
-                             toSendAmount: Double, toAddress: String, fee: Double = 0.0) -> (payload: Data, outputCount: UInt8) {
-        let needsTwoOutputTransactions =
-            runningAmount != (Decimal(toSendAmount) + Decimal(fee))
+                             toSendAmount: Decimal, toAddress: String, fee: Decimal = 0.0) -> (payload: Data, outputCount: UInt8) {
+        let needsTwoOutputTransactions = runningAmount != (toSendAmount + fee)
         
         var outputCount: UInt8
         var payload: [UInt8] = []
-        if runningAmount == Decimal(0) && fee == 0.0 {
+        if runningAmount == 0 && fee == 0.0 {
             return (Data(bytes: payload), 0)
         }
         
@@ -312,9 +311,8 @@ public class Account : NSObject, Codable {
             //Transaction To Reciever
             outputCount = 2
             payload += asset.rawValue.dataWithHexString().bytes.reversed()
-            let amountToSend = toSendAmount * pow(10, 8)
-            let amountToSendRounded = round(amountToSend)
-            let amountToSendInMemory = UInt64(amountToSendRounded)
+            let amountToSend = toSendAmount * pow(Decimal(10), 8)
+            let amountToSendInMemory = (NSDecimalNumber(decimal: amountToSend)).uint64Value
             payload += toByteArray(amountToSendInMemory)
             
             //reciever addressHash
@@ -322,10 +320,10 @@ public class Account : NSObject, Codable {
             
             //Transaction To Sender
             payload += asset.rawValue.dataWithHexString().bytes.reversed()
-            let runningAmountRounded = round(NSDecimalNumber(decimal: runningAmount * pow(10, 8)).doubleValue)
-            let feeRounded = round(fee * pow(10, 8))
-            let amountToGetBack = runningAmountRounded - amountToSendRounded - feeRounded
-            let amountToGetBackInMemory = UInt64(amountToGetBack)
+            let runningAmountRounded = runningAmount * pow(Decimal(10), 8)
+            let feeRounded = fee * pow(Decimal(10), 8)
+            let amountToGetBack = runningAmountRounded - amountToSend - feeRounded
+            let amountToGetBackInMemory = NSDecimalNumber(decimal: amountToGetBack).uint64Value
             
             payload += toByteArray(amountToGetBackInMemory)
             payload += hashedSignature.bytes
@@ -333,9 +331,8 @@ public class Account : NSObject, Codable {
         } else {
             outputCount = 1
             payload += asset.rawValue.dataWithHexString().bytes.reversed()
-            let amountToSend = toSendAmount * pow(10, 8)
-            let amountToSendRounded = round(amountToSend)
-            let amountToSendInMemory = UInt64(amountToSendRounded)
+            let amountToSend = toSendAmount * pow(Decimal(10), 8)
+            let amountToSendInMemory = (NSDecimalNumber(decimal: amountToSend)).uint64Value
             
             payload += toByteArray(amountToSendInMemory)
             payload += toAddress.hashFromAddress().dataWithHexString()
@@ -353,7 +350,7 @@ public class Account : NSObject, Codable {
         return Data(bytes: payload)
     }
     
-    public func generateSendTransactionPayload(asset: AssetId, amount: Double, toAddress: String, assets: Assets, attributes: [TransactionAttritbute]? = nil, fee: Double = 0.0) -> (txID:String, payload:Data) {
+    public func generateSendTransactionPayload(asset: AssetId, amount: Decimal, toAddress: String, assets: Assets, attributes: [TransactionAttritbute]? = nil, fee: Decimal = 0.0) -> (txID:String, payload:Data) {
         var error: NSError?
         
         var mainInputData: (totalAmount: Decimal?, inputCount: UInt8?, payload: Data?, error: Error?)
@@ -443,9 +440,9 @@ public class Account : NSObject, Codable {
         return (txid, finalPayload)
     }
     
-    private func generateInvokeTransactionPayload(assets: Assets? = nil, script: String, contractAddress: String, attributes: [TransactionAttritbute]?, fee: Double = 0.0) -> (String, Data) {
+    private func generateInvokeTransactionPayload(assets: Assets? = nil, script: String, contractAddress: String, attributes: [TransactionAttritbute]?, fee: Decimal = 0.0) -> (String, Data) {
         var error: NSError?
-        let amount = 0.00000001
+        let amount = Decimal(0.00000001)
         
         let mainInputData = getInputsNecessaryToSendGas(amount: amount, assets: assets, fee: fee)
         let mainOutputData = getOuputDataPayload(asset: AssetId.gasAssetId, with: mainInputData.payload!,
@@ -472,9 +469,9 @@ public class Account : NSObject, Codable {
     }
     
     private func buildNEP5TransferScript(scriptHash: String, decimals: Int, fromAddress: String,
-                                         toAddress: String, amount: Double) -> [UInt8] {
+                                         toAddress: String, amount: Decimal) -> [UInt8] {
         
-        let amountToSend = Int(amount * pow(10, Double(decimals)))
+        let amountToSend = NSDecimalNumber(decimal: amount * pow(Decimal(10), decimals)).intValue
         let fromAddressHash = fromAddress.hashFromAddress()
         let toAddressHash = toAddress.hashFromAddress()
         let scriptBuilder = ScriptBuilder()
@@ -493,7 +490,7 @@ public class Account : NSObject, Codable {
         return [UInt8(script.count)] + script
     }
     
-    @objc public func sendNep5Token(seedURL: String, contractScripthash: String, decimals: Int, amount: Double, toAddress: String,
+    @objc public func sendNep5Token(seedURL: String, contractScripthash: String, decimals: Int, amount: Decimal, toAddress: String,
                               attributes: [TransactionAttritbute]? = nil, completion: @escaping(Bool, NeoClientError?, String?) -> Void) {
         
         var customAttributes: [TransactionAttritbute] = []
